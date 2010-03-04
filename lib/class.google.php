@@ -10,19 +10,16 @@
 // MIT license.
 //
 
-class googleLatitude
-{
-	private $cookieFile; // Where we store the Google session cookie
-	private $lastURL;    // The previous URL as visited by curl
+class GoogleLatitude {
+	private $cookie_file; // Where we store the Google session cookie
+	private $last_url;    // The previous URL as visited by curl
 
-	public function __construct()
-	{
-		$this->cookieFile = dirname(__FILE__) . "/google-cookie.txt";
+	public function __construct() {
+		$this->cookie_file = dirname(__FILE__) . "/google-cookie.txt";
 	}
 
 	// Update the location on google latitude
-	public function updateLatitude($lat, $lng, $accuracy)
-	{
+	public function updateLatitude($lat, $lng, $accuracy) {
 		/* build the post data */
 		$post_data  = "t=ul&mwmct=iphone&mwmcv=5.8&mwmdt=iphone&mwmdv=30102&auto=true&nr=180000&";
 		$post_data .= "cts=" . time() . "000&lat=$lat&lng=$lng&accuracy=$accuracy";
@@ -31,12 +28,11 @@ class googleLatitude
 		$header = array("X-ManualHeader: true");
 
 		/* execute the location update */
-		$this->curlPost("http://maps.google.com/glm/mmap/mwmfr?hl=en", $post_data, $this->lastURL, $header);
+		$this->curlPost("http://maps.google.com/glm/mmap/mwmfr?hl=en", $post_data, $this->last_url, $header);
 	}
 
 	/* obtain listing of friends and their location */
-	public function friendList()
-	{
+	public function friendList() {
 		/* create the friend output array */
 		$friends = array();
 
@@ -47,47 +43,43 @@ class googleLatitude
 		$header = array("X-ManualHeader: true");
 
 		/* execute the http request */
-		$response = $this->curlPost("http://maps.google.com/glm/mmap/mwmfr?hl=en", $post_data, $this->lastURL, $header);
+		$response = $this->curlPost("http://maps.google.com/glm/mmap/mwmfr?hl=en", $post_data, $this->last_url, $header);
 
 		/* parse out the friends from the response */
-		if (preg_match_all('/,\[,\[,"-?\d+",3,1,1,,0\]\n,"(?<email>[^"]+)","(?<name>[^"]+)",(?<phone>[^,]*),(?<lat>-?\d+),(?<lon>-?\d+),"(?<timestamp>\d{10})\d{3}",(?<accuracy>\d*),\["(?<address>[^"]*)","(?<city_state>[^"]*)"]/', $response, $matches, PREG_SET_ORDER))
-		{
+		if (preg_match_all('/,\[,\[,"-?\d+",3,1,1,,0\]\n,"(?<email>[^"]+)","(?<name>[^"]+)",(?<phone>[^,]*),(?<lat>-?\d+),(?<lon>-?\d+),"(?<timestamp>\d{10})\d{3}",(?<accuracy>\d*),\["(?<address>[^"]*)","(?<city_state>[^"]*)"]/', $response, $matches, PREG_SET_ORDER)) {
 			/* create friendly output array */
-			foreach ($matches as $match)
-			{
+			foreach ($matches as $match) {
 				$friends[] = array(
-						"name"			=> $match["name"],
-						"email"			=> $match["email"],
-						"phone"			=> $match["phone"],
-						"lat"			=> $match["lat"],
-						"lon"			=> $match["lon"],
-						"accuracy"		=> $match["accuracy"],
-						"timestamp"		=> $match["timestamp"],
-						"address"		=> $match["address"],
-						"city_state"	=> $match["city_state"],
-					);
+					"name" => $match["name"],
+					"email" => $match["email"],
+					"phone" => $match["phone"],
+					"lat" => $match["lat"],
+					"lon" => $match["lon"],
+					"accuracy" => $match["accuracy"],
+					"timestamp" => $match["timestamp"],
+					"address" => $match["address"],
+					"city_state" => $match["city_state"],
+				);
 			}
 		}
 		
 		return $friends;
 	}
 
-	// Login to google and save the cookie in $cookieFile
-	public function login($username, $password)
-	{
+	// Login to google and save the cookie in $cookie_file
+	public function login($username, $password) {
 		/* obtain needed cookies from the mobile latitude site */
 		$html = $this->curlGet("http://maps.google.com/maps/m?mode=latitude");
 
 		/* obtain login form and cookies */
-		$html = $this->curlGet("https://www.google.com/accounts/ServiceLogin?service=friendview&hl=en&nui=1&continue=http://maps.google.com/maps/m%3Fmode%3Dlatitude", $this->lastURL);
+		$html = $this->curlGet("https://www.google.com/accounts/ServiceLogin?service=friendview&hl=en&nui=1&continue=http://maps.google.com/maps/m%3Fmode%3Dlatitude", $this->last_url);
 
 		/* parse out the hidden fields */
 		preg_match_all('!hidden.*?name=["\'](.*?)["\'].*?value=["\'](.*?)["\']!ms', $html, $hidden);
 
 		/* build post data */
 		$post_data = '';
-		for($i = 0; $i < count($hidden[1]); $i++)
-		{
+		for($i = 0; $i < count($hidden[1]); $i++) {
 			$post_data .= $hidden[1][$i] . '=' . urlencode($hidden[2][$i]) . '&';
 		}
 
@@ -96,31 +88,28 @@ class googleLatitude
 		$post_data .= "&Passwd=$password";
 
 		/* execute the login */
-		$html = $this->curlPost("https://www.google.com/accounts/ServiceLoginAuth?service=friendview", $post_data, $this->lastURL);
+		$html = $this->curlPost("https://www.google.com/accounts/ServiceLoginAuth?service=friendview", $post_data, $this->last_url);
 
 		/* verify the login was successful */
-		if (strpos ($html, "Sign in") != FALSE)
-		{
-			unlink($this->cookieFile);
+		if (strpos ($html, "Sign in") != false) {
+			unlink($this->cookie_file);
 			return false;
 		}
 
 		/* reset the permissions of the cookie file */
-		chmod($this->cookieFile, 0600);
+		chmod($this->cookie_file, 0600);
 		return true;
 	}
 
-	public function haveCookie()
-	{
-		return file_exists($this->cookieFile);
+	public function haveCookie() {
+		return file_exists($this->cookie_file);
 	}
 
-	private function curlGet($url, $referer = null, $headers = null)
-	{
+	private function curlGet($url, $referer = null, $headers = null) {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookieFile);
-		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookieFile);
+		curl_setopt($ch, CURLOPT_cookie_file, $this->cookie_file);
+		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -133,22 +122,20 @@ class googleLatitude
 
 		$html = curl_exec($ch);
 
-		if (curl_errno($ch) != 0)
-		{
+		if (curl_errno($ch) != 0) {
 			die("\nError during GET of '$url': " . curl_error($ch) . "\n");
 		}
 
-		$this->lastURL = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+		$this->last_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 
 		return $html;
 	}
 
-	private function curlPost($url, $post_vars = null, $referer = null, $headers = null)
-	{
+	private function curlPost($url, $post_vars = null, $referer = null, $headers = null) {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookieFile);
-		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookieFile);
+		curl_setopt($ch, CURLOPT_cookie_file, $this->cookie_file);
+		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -163,12 +150,11 @@ class googleLatitude
 
 		$html = curl_exec($ch);
 
-		if (curl_errno($ch) != 0)
-		{
+		if (curl_errno($ch) != 0) {
 			die("\nError during POST of '$url': " . curl_error($ch) . "\n");
 		}
 
-		$this->lastURL = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+		$this->last_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 
 		return $html;
 	}
