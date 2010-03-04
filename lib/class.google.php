@@ -1,14 +1,17 @@
 <?php
-
-// A class to login to Google Latitude Mobile, save a session cookie
-// and update Latitude with a given location.
-//
-// Nat Friedman <nat@nat.org>
-// Jack Catchpoole <jack@catchpoole.com>
-// Andy Blyler <ajb@blyler.cc>
-//
-// MIT license.
-//
+/*------------------------------------------------------------------------------
+    File: lib/class.google.php
+ Project: PHP Google Latitude Updater
+ Version: 0.1.0
+      By: Tim Oram <t.oram@mitmaro.ca>
+ Purpose: A class to login to Google Latitude Mobile, save a session cookie and
+          update Latitude with a given location.        
+  Forked: http://github.com/ablyler/playnice
+  Credit: Nat Friedman <nat@nat.org>
+          Jack Catchpoole <jack@catchpoole.com>
+          Andy Blyler <ajb@blyler.cc>
+ License: MIT License. See COPYING for full license
+------------------------------------------------------------------------------*/
 
 class GoogleLatitude {
 	private $cookie_file; // Where we store the Google session cookie
