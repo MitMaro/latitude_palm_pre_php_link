@@ -76,7 +76,7 @@ class GoogleLatitude {
 	private function curlGet($url, $referer = null, $headers = null) {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_cookie_file, $this->cookie_file);
+		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
@@ -102,7 +102,7 @@ class GoogleLatitude {
 	private function curlPost($url, $post_vars = null, $referer = null, $headers = null) {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_cookie_file, $this->cookie_file);
+		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie_file);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
