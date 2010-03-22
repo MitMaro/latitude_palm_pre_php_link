@@ -1,0 +1,11 @@
+{
+	"id": "ca.mitmaro.prelatitude",
+	"version": "0.1.0",
+	"vendor": "mitmaro",
+	"type": "web",
+	"main": "index.html",
+	"title": "Pre Latitude",
+	"removable": true,
+	"theme": "light",
+    "noWindow" : "true"
+}
