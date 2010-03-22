@@ -18,3 +18,4 @@ $password = '';
 // send plain text from your cellphone
 $passkey = '';
 
+$cookie_file = dirname(__FILE__) . '../tmp/google_cookie.txt';
